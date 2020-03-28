@@ -1,0 +1,50 @@
+<%- include("partials/header.ejs") %>
+
+<section class="jumbotron text-center bg-light border-bottom" style="background:transparent !important">
+    <div class="container">
+        <h1 class="jumbotron-heading">Expense Tracker</h1>
+        <p class="lead text-muted">A minimal expense tracker to save and track your monthly expenses.</p>
+
+    </div>
+</section>
+
+<div class="container">
+    <h1 class="text-center">Features</h1>
+    <div class="row justify-content-around pt-40">
+        <div class="col-md-4">
+            <div class="card mb-4 box-shadow">
+
+                <div class="card-body">
+                    <p class="card-text">Save expenses for every month without any hassle and categorise them with our
+                        predefined categories.</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="btn-group">
+                            <a type="button" class="btn btn-sm btn-outline-secondary" href="/expenses/new">Create
+                                Expense</a>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4 box-shadow">
+
+                <div class="card-body">
+                    <p class="card-text">View money spent in a selected month, including the total expenses and the
+                        money spent per catogory.</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="btn-group">
+                            <a type="button" class="btn  btn-sm btn-outline-secondary" href="/expenses?_method=GET">View
+                                Expenses</a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include("partials/footer.ejs") %>

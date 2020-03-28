@@ -1,0 +1,142 @@
+<%- include("partials/header.ejs") %>
+
+<h1 class="display-4 text-center border-bottom">Your Expenses</h1>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6"  style="margin-top: 100px;">
+
+            <form class="d-inline" action="/expenses/search" method="POST">
+                
+                <div class="form-row">
+
+                    <div class="col-auto">
+                        <label for="monthInput">Month</label>
+                        <select  name="monthPicker" class="custom-select form-control" id="monthInput" required>
+            
+                            <% for(var m=0; m<=11; m++) { %>
+                            <option value="<%= m+1 %>"> <%= monthArray[m] %> </option>
+                            <% } %>
+                        </select>
+                    </div>
+                
+            
+                    
+                    <div class="col-auto">
+                        <label for="yearInput">Year</label>
+                        <select  name="yearPicker" class="custom-select form-control" id="yearInput" required>
+                            <% for(var y=0; y<=499; y++) { %>
+                            <option value="<%= y+2000 %>"> <%= yearsArray[y] %> </option>
+                            <% } %>
+                        </select>
+                    </div>
+                    
+                    
+                    
+                        <div class="col-auto">
+                            
+                            <br>
+                            <button class="btn btn-primary" type="submit" id="buttonInput" style="padding: 10px;">SEARCH</button>
+                        </div>
+                    
+            
+
+                </div>
+                    
+                
+            </form>
+
+
+            <table class="table" style="margin-top: 100px;">
+                
+                
+                <caption>Expenses for the month of <span class="font-weight-bold"> <%= monthArray[currentMonth] %> </span> </caption>
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Category</th>
+                        <th scope="col">Description</th>
+                        <th scope="col">Amount</th>
+                        <th scope="col">Edit</th>
+                    </tr>
+                </thead>
+            
+                <tbody>
+                    <% currentMonthExpensesList.forEach(function(expense){ %>
+            
+                        <tr>
+                    
+                            <td><%=expense.category%></td>
+                            <td><%=expense.description%></td>
+                            <td><%=expense.amount%></td>
+                            <td><a href="/expenses/<%=expense._id%>/edit">edit</a></td>
+                    
+                        </tr>
+                    
+                        <%});%>
+                </tbody>
+            </table>
+            
+            
+
+
+
+        </div>
+
+        <div class="col-md-6"  style="margin-top: 100px;">
+            <h1 class="display-5 border-bottom">Hi, <span style="font-size: 22px;">below is a summary of your expenses.</span></h1>
+            <br>
+
+            
+                <div class="row">
+                    <div class="col-6">
+                        <div class="card" style="width: 18rem; height: 18rem; margin-top: 5px;">
+                            <div class="card-body">
+                              <h5 class="card-title">Total Expenses so far</h5>
+                              <p class="card-text">Rs. <%=sumExpenses%></p>
+                            </div>
+                          </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="card" style="width: 18rem; height: 18rem; margin: 5px;">
+                            <div class="card-body">
+                              <h5 class="card-title">Expenses for the month of  <%= monthArray[currentMonth] %> </h5>
+                              <p class="card-text">Rs. <%=sumExpensesPerMonth%></p>
+                            </div>
+                          </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="card" style="width: 18rem; height: 18rem; margin-top: 5px;">
+                            <div class="card-body">
+                              <h5 class="card-title">Category Wise Expenses so far</h5>
+                              <% for (const [category, amount] of Object.entries(categoryExpenses)){ %>
+                                    <p class="card-text font-weight-bold"> <%= category %></p>
+                                    <p class="card-text"> <%= amount %></p>
+                                <% } %>
+                            </div>
+                          </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="card" style="width: 18rem; height: 18rem; margin: 5px;">
+                            <div class="card-body">
+                              <h5 class="card-title">Category Wise Expenses for the month of <%= monthArray[currentMonth] %></h5>
+                              <% for (const [category, amount] of Object.entries(categoryExpensesPerMonth)){ %>
+                                <p class="card-text font-weight-bold"> <%= category %></p>
+                                <p class="card-text"> <%= amount %></p>
+                            <% } %>
+                            </div>
+                          </div>
+                    </div>
+                </div>
+            
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+<%- include("partials/footer.ejs") %>

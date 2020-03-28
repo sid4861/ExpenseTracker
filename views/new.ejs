@@ -1,0 +1,56 @@
+<%- include("partials/header.ejs") %>
+
+<h1 class="display-4 text-center border-bottom">Add Expense</h1>
+<form  action="/expenses" method="post">
+   
+    <div class="form-row m-4">
+        <div class="col-auto">
+            <label for="dateInput">Date</label>
+            <input type="date" name="expense[date]" class="form-control" id="dateInput" required>
+            
+          </div>
+    </div>
+    
+      <div class="form-row m-4">
+        <div class="col-auto">
+            <label for="categoryInput">Expense Category</label>
+            <select name="expense[category]" class="custom-select form-control" id="categoryInput" required>
+                <option value="Groceries">Groceries</option>
+                <option value="Entertainment">Entertainment</option>
+                <option value="House Rent">House Rent</option>
+              </select>
+          </div>
+      </div>
+   
+   <div class="form-row m-4">
+    <div class="col-auto">
+        <label for="descriptionInput">Description</label>
+        <input type="text" name="expense[description]" class="form-control" id="descriptionInput" aria-describedby="descriptionHelp" required>
+        <small id="descriptionHelp" class="form-text text-muted">For eg, movie night</small>
+      </div>
+   </div>
+      
+<div class="form-row m-4">
+    <div class="col-auto">
+        <label for="amountInput">Amount Spent</label>
+        <input type="number" name="expense[amount]" class="form-control" id="amountInput" aria-describedby="amountHelp" required>
+        <small id="amountHelp" class="form-text text-muted">For eg, 100</small>
+      </div>
+</div>
+      
+<div class="form-row m-4">
+    <div class="col-auto">
+        <button class="btn btn-primary" type="submit">SAVE</button>
+    </div>
+</div>
+      
+<div class="form-row m-4">
+    <div class="col-auto">
+        <a class="btn btn-primary" href="/">BACK</a>
+    </div>
+</div>
+
+</form>
+
+
+<%- include("partials/footer.ejs") %>
