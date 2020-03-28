@@ -1,6 +1,19 @@
 var express = require('express');
 var app = express()
 
+var expressSession = require('express-session');
+var passport = require('passport');
+var localStrategy = require('passport-local');
+var passportLocalMongoose = require('passport-local-mongoose');
+
+app.use(expressSession({
+    secret : "Hi this is Siddharth",
+    resave: false,
+    saveUninitialized : false
+}));
+
+
+
 var bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -17,7 +30,33 @@ var mongoose = require('mongoose');
 
 mongoose.connect('mongodb://localhost:27017/ExpenseTracker', { useNewUrlParser: true });
 
+var UserSchema =  new mongoose.Schema({
+    username : String,
+    password : String
+});
+UserSchema.plugin(passportLocalMongoose);
+
+var User = mongoose.model("User", UserSchema);
+passport.use(new localStrategy(User.authenticate()));
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+app.use(function(req, res, next){
+    res.locals.currentUser = req.user;
+    next();
+});
+
 var expenseSchema = new mongoose.Schema({
+    user : {
+        id : {
+            type : mongoose.Schema.Types.ObjectId,
+            ref : "User"
+        },
+        username : String
+    },
     category: String,
     description: String,
     amount: Number,
@@ -25,6 +64,7 @@ var expenseSchema = new mongoose.Schema({
 });
 
 var expense = mongoose.model("expense", expenseSchema);
+
 
 //functions to get  years for the dropdown menu
 var monthArray = [];
@@ -47,11 +87,60 @@ for(var y = 2000; y<=2500; y++){
 }
 
 
+//********************************** */
+
+// auth routes
+
+//sign up form
+
+app.get('/register', function(req, res){
+    res.render('register.ejs');
+});
+
+// sign up logic
+
+app.post('/register', function(req, res){
+    User.register(new User({username : req.body.username}), req.body.password, function(err, user){
+        if(err){
+            console.log(err);
+            return res.redirect("/");
+        }
+
+        passport.authenticate("local")(req, res, function(){
+            res.redirect('/home');
+        });
+    } );
+});
+//login form
+
+app.get('/login', function(req, res){
+    res.render('login.ejs');
+});
+
+app.post('/login', passport.authenticate("local", {
+    successRedirect : '/home',
+    failureRedirect : '/'
+}), function(req, res){
+    
+});
+
+//logout
+
+app.get('/logout', function(req, res){
+    req.logout();
+    res.redirect('/');
+});
+//**************************** */
+
 app.get('/', function(req, res){
     res.render('home.ejs');
 });
 
-app.get("/expenses", function(req, res){
+app.get('/home', isLoggedIn, function(req, res){
+    res.render('loggedinhome.ejs');
+});
+
+app.get("/expenses", isLoggedIn, function(req, res){
     
     
     var sumExpenses  = 0;
@@ -62,7 +151,7 @@ app.get("/expenses", function(req, res){
     // console.log(date.getMonth());
     // console.log(date.getFullYear());
 
-    expense.find({}, function(err, expenses){
+    expense.find({ 'user.username' : req.user.username }, function(err, expenses){
         var allExpensesList = expenses;
         var categoryExpenses = calculateCategoryExpenses(allExpensesList);
         //console.log(allExpensesList);
@@ -85,7 +174,7 @@ app.get("/expenses", function(req, res){
     
 });
 
-app.post("/expenses/search", function(req, res){
+app.post("/expenses/search", isLoggedIn, function(req, res){
     var sumExpenses  = 0;
     var sumExpensesPerMonth = 0;
     var month = req.body.monthPicker;
@@ -95,7 +184,7 @@ app.post("/expenses/search", function(req, res){
 
     var currentMonthExpensesList = [];
     
-    expense.find({}, function(err, expenses){
+    expense.find({'user.username' : req.user.username}, function(err, expenses){
         var allExpensesList = expenses;
         var categoryExpenses = calculateCategoryExpenses(allExpensesList);
         allExpensesList.forEach(function(expenseitem){
@@ -118,20 +207,25 @@ app.post("/expenses/search", function(req, res){
 
 });
 
-app.get("/expenses/new", function(req, res){
+app.get("/expenses/new", isLoggedIn, function(req, res){
     res.render('new.ejs');
 });
 
-app.post("/expenses", function(req, res){
+app.post("/expenses", isLoggedIn, function(req, res){
     req.body.expense.description = req.sanitize(req.body.expense.description);
+    console.log(req.user._id);
+    console.log(req.user.username);
 
     console.log(req.body.expense);
     expense.create(req.body.expense, function(err, createdExpense){
         if(err){
-            res.redirect("/");
+            res.redirect("/expenses/new");
         }
         else{
-            res.redirect("/");
+            createdExpense.user.id = req.user._id;
+            createdExpense.user.username = req.user.username;
+            createdExpense.save();
+            res.redirect("/home");
         }
     });
 });
@@ -155,7 +249,7 @@ app.get("/expenses/:id/edit", function(req, res){
 
 app.put("/expenses/:id", function(req, res){
     expense.findByIdAndUpdate(req.params.id, req.body.expense, function(err, updatedBlog){
-        res.redirect("/");
+        res.redirect("/home");
     });
 });
 
@@ -190,6 +284,18 @@ function calculateCategoryExpensesPerMonth(expenses){
     //console.log(categoryExpensesPerMonth);
     return categoryExpensesPerMonth;
 }
+
+
+//middleware to check if user is logged in
+
+function isLoggedIn(req, res, next){
+    if(req.isAuthenticated()){
+        return next();
+    }
+
+    res.redirect('/login');
+}
+
 
 app.listen(3000,function(){
     console.log('app started');
